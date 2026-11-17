@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Calcolo cilindro pneumatico</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true"><span></span></div>
+        <div>
+          <p class="eyebrow">ISO 15552 · doppio effetto</p>
+          <h1>Calcolo cilindro pneumatico</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="button button-ai" type="button" id="ai-open-button"><span aria-hidden="true">&#10022;</span> Assistente AI</button>
+        <button class="button button-quiet" type="button" id="import-button">Importa dati</button>
+        <button class="button button-quiet" type="button" id="export-button">Esporta dati</button>
+        <button class="button button-quiet" type="button" id="print-button">Stampa</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+      </div>
+    </header>
+
+    <nav class="view-nav" aria-label="Sezioni di calcolo">
+      <button class="nav-item is-active" type="button" data-view="inputs" aria-current="page">
+        <span class="nav-index">01</span><span>Dati cilindro</span>
+      </button>
+      <button class="nav-item" type="button" data-view="performance">
+        <span class="nav-index">02</span><span>Forze e portate</span>
+      </button>
+      <button class="nav-item" type="button" data-view="buckling">
+        <span class="nav-index">03</span><span>Carico di punta</span>
+      </button>
+      <button class="nav-item" type="button" data-view="cushioning">
+        <span class="nav-index">04</span><span>Ammortizzo</span>
+      </button>
+    </nav>
+
+    <main id="main-content">
+      <section class="view is-active" id="view-inputs" data-view-panel="inputs">
+        <div class="view-heading">
+          <div>
+            <p class="section-kicker">Dati di progetto</p>
+            <h2>Definizione del cilindro</h2>
+            <p>Inserire geometria, condizioni di esercizio e parametri delle verifiche.</p>
+          </div>
+          <button class="button button-danger-quiet" type="button" id="reset-button">Ripristina esempio</button>
+        </div>
+
+        <form id="input-form" novalidate>
+          <div class="form-section">
+            <div class="section-label">
+              <h3>Geometria</h3>
+              <p>Dimensioni nominali in millimetri.</p>
+            </div>
+            <div class="field-grid">
+              <label class="field">
+                <span>Alesaggio <span class="symbol">D</span></span>
+                <div class="control-with-unit">
+                  <select id="bore" name="bore">
+                    <option value="25">25</option><option value="32">32</option>
+                    <option value="40">40</option><option value="50">50</option>
+                    <option value="63">63</option><option value="80">80</option>
+                    <option value="100">100</option><option value="125">125</option>
+                    <option value="160">160</option><option value="200">200</option>
+                    <option value="250">250</option><option value="320">320</option>
+                  </select><span class="unit">mm</span>
+                </div>
+              </label>
+              <label class="field">
+                <span>Diametro stelo <span class="symbol">d</span></span>
+                <div class="control-with-unit"><input id="rod" name="rod" inputmode="decimal"><span class="unit">mm</span></div>
+              </label>
+              <label class="field">
+                <span>Corsa <span class="symbol">c</span></span>
+                <div class="control-with-unit"><input id="stroke" name="stroke" inputmode="decimal"><span class="unit">mm</span></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">
+              <h3>Esercizio</h3>
+              <p>Pressione relativa e ciclo operativo.</p>
+            </div>
+            <div class="field-grid">
+              <label class="field"><span>Pressione <span class="symbol">P</span></span><div class="control-with-unit"><input id="pressure" name="pressure" inputmode="decimal"><span class="unit">bar</span></div></label>
+              <label class="field"><span>Frequenza <span class="symbol">n</span></span><div class="control-with-unit"><input id="frequency" name="frequency" inputmode="decimal"><span class="unit">cicli/min</span></div></label>
+              <label class="field"><span>Temperatura</span><div class="control-with-unit"><input id="temperature" name="temperature" inputmode="decimal"><span class="unit">°C</span></div></label>
+              <label class="field"><span>Lavoro giornaliero</span><div class="control-with-unit"><input id="dailyHours" name="dailyHours" inputmode="decimal"><span class="unit">ore/die</span></div></label>
+              <label class="field"><span>Lavoro annuo</span><div class="control-with-unit"><input id="annualDays" name="annualDays" inputmode="decimal"><span class="unit">giorni/anno</span></div></label>
+              <label class="field"><span>Massa esterna</span><div class="control-with-unit"><input id="mass" name="mass" inputmode="decimal"><span class="unit">kg</span></div></label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">
+              <h3>Carico di punta</h3>
+              <p>Acciaio cromato C45 come nel foglio originale.</p>
+            </div>
+            <div class="field-grid">
+              <label class="field"><span>Modulo elastico <span class="symbol">E</span></span><div class="control-with-unit"><input id="elasticModulus" name="elasticModulus" inputmode="decimal"><span class="unit">N/mm²</span></div></label>
+              <label class="field"><span>Coeff. lunghezza libera <span class="symbol">k</span></span><select id="lengthFactor" name="lengthFactor"><option value="0.5">0,5 · incastro–incastro</option><option value="0.7">0,7 · incastro–cerniera</option><option value="1">1 · cerniera–cerniera</option><option value="2">2 · incastro–libero</option></select></label>
+              <label class="field"><span>Coeff. di sicurezza <span class="symbol">k<sub>s</sub></span></span><input id="safetyFactor" name="safetyFactor" inputmode="decimal"></label>
+              <label class="field"><span>Carico da verificare</span><select id="loadMode" name="loadMode"><option value="theoretical">Spinta teorica</option><option value="effective80">Spinta effettiva 80%</option><option value="effective60">Spinta effettiva 60%</option><option value="manual">Valore manuale</option></select></label>
+              <label class="field" id="manual-load-field"><span>Carico assiale manuale</span><div class="control-with-unit"><input id="manualLoad" name="manualLoad" inputmode="decimal"><span class="unit">N</span></div></label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">
+              <h3>Ammortizzo</h3>
+              <p>La velocità calcolata replica il foglio: corsa totale per ciclo.</p>
+            </div>
+            <div class="field-grid">
+              <label class="field"><span>Velocità d’impatto</span><select id="velocityMode" name="velocityMode"><option value="calculated">Calcolata da corsa e frequenza</option><option value="manual">Valore manuale</option></select></label>
+              <label class="field" id="manual-velocity-field"><span>Velocità manuale</span><div class="control-with-unit"><input id="manualVelocity" name="manualVelocity" inputmode="decimal"><span class="unit">m/s</span></div></label>
+              <label class="field calculated-field" id="velocity-preview-field"><span id="velocity-preview-label">Velocità calcolata</span><div class="control-with-unit"><input id="velocityPreview" readonly tabindex="-1" aria-label="Velocità utilizzata nella verifica"><span class="unit">m/s</span></div></label>
+            </div>
+          </div>
+        </form>
+
+        <div class="form-footer">
+          <p id="validation-summary" role="status">Dati completi e validi.</p>
+          <button class="button button-primary" type="button" data-go="performance">Calcola forze e portate</button>
+        </div>
+      </section>
+
+      <section class="view view-performance" id="view-performance" data-view-panel="performance">
+        <div class="view-heading">
+          <div><p class="section-kicker">Prestazioni</p><h2>Forze e portate</h2><p>Valori aggiornati con i dati del cilindro.</p></div>
+          <div class="heading-tools">
+            <div class="context-chip" id="performance-context"></div>
+            <button class="button lesson-button lesson-blue" type="button" data-lesson="performance">Approfondimento</button>
+          </div>
+        </div>
+        <div class="metric-band metric-band-primary">
+          <article class="force-metric"><span>Spinta teorica</span><strong id="force-push-theoretical">—</strong><small>N</small></article>
+          <article class="force-metric"><span>Trazione teorica</span><strong id="force-pull-theoretical">—</strong><small>N</small></article>
+          <article><span>Portata totale norm.</span><strong id="flow-total-normal">—</strong><small>Nl/min</small></article>
+          <article><span>Consumo annuo</span><strong id="annual-consumption">—</strong><small>Nl/anno</small></article>
+        </div>
+        <div class="split-layout">
+          <section class="data-section">
+            <div class="data-heading"><h3>Forze effettive</h3><p>Coefficienti operativi del foglio originale.</p></div>
+            <div class="comparison-table">
+              <div class="table-row table-header"><span>Condizione</span><span>Spinta</span><span>Trazione</span></div>
+              <div class="table-row"><span>Senza regolatori di flusso <em>80%</em></span><strong id="force-push-80">—</strong><strong id="force-pull-80">—</strong></div>
+              <div class="table-row"><span>Con regolatori di flusso <em>60%</em></span><strong id="force-push-60">—</strong><strong id="force-pull-60">—</strong></div>
+            </div>
+          </section>
+          <section class="data-section">
+            <div class="data-heading"><h3>Portate</h3><p>Volumetriche e normalizzate a 1 bar assoluto e 20 °C.</p></div>
+            <dl class="result-list">
+              <div><dt>Uscita</dt><dd><strong id="flow-out-lmin">—</strong> l/min <small id="flow-out-m3s"></small></dd></div>
+              <div><dt>Rientro</dt><dd><strong id="flow-in-lmin">—</strong> l/min <small id="flow-in-m3s"></small></dd></div>
+              <div><dt>Uscita normalizzata</dt><dd><strong id="flow-out-normal">—</strong> Nl/min</dd></div>
+              <div><dt>Rientro normalizzata</dt><dd><strong id="flow-in-normal">—</strong> Nl/min</dd></div>
+            </dl>
+          </section>
+        </div>
+        <div class="formula-strip"><span>Relazioni principali</span><code>F = A · P</code><code>Q = A · c · n</code><code>Q<sub>N</sub> = Q · (P + 1) · 293 / T</code></div>
+        <div class="view-footer"><button class="button button-quiet" type="button" data-go="inputs">Modifica dati</button><button class="button button-primary" type="button" data-go="buckling">Verifica carico di punta</button></div>
+      </section>
+
+      <section class="view view-buckling" id="view-buckling" data-view-panel="buckling">
+        <div class="view-heading">
+          <div><p class="section-kicker">Stabilità dello stelo</p><h2>Verifica a carico di punta</h2><p>Metodo di Eulero con lunghezza libera equivalente e coefficiente di sicurezza.</p></div>
+          <div class="heading-tools">
+            <div class="status-badge" id="buckling-status">—</div>
+            <button class="button lesson-button lesson-orange" type="button" data-lesson="buckling">Approfondimento</button>
+          </div>
+        </div>
+        <div class="verification-layout">
+          <section class="verification-hero">
+            <div class="load-visual" aria-hidden="true">
+              <div class="main-buckling-assembly">
+                <div class="main-cylinder"><span class="main-piston"></span></div>
+                <div class="main-rod"></div>
+                <div class="main-mass">m</div>
+                <div class="main-force">F <span>←</span></div>
+              </div>
+            </div>
+            <div class="utilization-block"><span>Utilizzo del carico ammissibile</span><strong id="buckling-utilization">—</strong><div class="meter"><span id="buckling-meter"></span></div><p id="buckling-message"></p></div>
+          </section>
+          <section class="data-section">
+            <div class="data-heading"><h3>Risultati</h3><p id="buckling-load-label"></p></div>
+            <dl class="result-list">
+              <div><dt>Snellezza geometrica c/d</dt><dd><strong id="slenderness">—</strong></dd></div>
+              <div><dt>Lunghezza libera S<sub>L</sub></dt><dd><strong id="free-length">—</strong> mm</dd></div>
+              <div><dt>Forza critica F<sub>cr</sub></dt><dd><strong id="critical-load">—</strong> N</dd></div>
+              <div><dt>Forza ammissibile F<sub>amm</sub></dt><dd><strong id="allowable-load">—</strong> N</dd></div>
+              <div><dt>Carico verificato</dt><dd><strong id="applied-load">—</strong> N</dd></div>
+              <div><dt>Margine</dt><dd><strong id="buckling-margin">—</strong> N</dd></div>
+            </dl>
+          </section>
+        </div>
+        <div class="notice" id="slenderness-notice"></div>
+        <div class="formula-strip"><span>Equazione di Eulero</span><code>I = πd⁴ / 64</code><code>F<sub>cr</sub> = π²EI / (kc)²</code><code>F<sub>amm</sub> = F<sub>cr</sub> / k<sub>s</sub></code></div>
+        <div class="view-footer"><button class="button button-quiet" type="button" data-go="performance">Forze e portate</button><button class="button button-primary" type="button" data-go="cushioning">Verifica ammortizzo</button></div>
+      </section>
+
+      <section class="view view-cushioning" id="view-cushioning" data-view-panel="cushioning">
+        <div class="view-heading">
+          <div><p class="section-kicker">Energia cinetica</p><h2>Verifica dell’ammortizzo</h2><p>Curve del diagramma trasformate in relazioni numeriche massa–velocità.</p></div>
+          <div class="heading-tools">
+            <div class="status-badge" id="cushioning-status">—</div>
+            <button class="button lesson-button lesson-purple" type="button" data-lesson="cushioning">Approfondimento</button>
+          </div>
+        </div>
+        <div class="cushioning-summary">
+          <article><span>Massa esterna</span><strong id="cush-mass">—</strong><small>kg</small></article>
+          <article><span>Velocità d’impatto</span><strong id="cush-velocity">—</strong><small>m/s</small></article>
+          <article><span>Energia cinetica</span><strong id="kinetic-energy">—</strong><small>J</small></article>
+          <article><span>Velocità limite</span><strong id="velocity-limit">—</strong><small>m/s</small></article>
+        </div>
+        <div class="chart-layout">
+          <section class="chart-panel">
+            <div class="chart-toolbar"><div><h3>Campo di ammortizzo interno</h3><p>Scala logaritmica. Il punto deve rimanere sotto la curva dell’alesaggio.</p></div><label>Curva evidenziata <select id="chart-bore" aria-label="Curva alesaggio nel diagramma"></select></label></div>
+            <div class="canvas-wrap"><canvas id="cushioning-chart" width="1100" height="620" aria-label="Diagramma massa velocità dell’ammortizzo"></canvas></div>
+          </section>
+          <aside class="equation-panel">
+            <p class="section-kicker">Equazione selezionata</p>
+            <h3 id="curve-title">—</h3>
+            <code id="curve-equation">—</code>
+            <dl class="compact-list">
+              <div><dt>Energia limite digitalizzata</dt><dd id="curve-energy">—</dd></div>
+              <div><dt>Massa massima diagramma</dt><dd id="curve-max-mass">—</dd></div>
+              <div><dt>Margine energia</dt><dd id="energy-margin">—</dd></div>
+              <div><dt>Margine velocità</dt><dd id="velocity-margin">—</dd></div>
+            </dl>
+            <p class="equation-note">Nel piano log–log la curva è una retta con pendenza −0,5. La verifica applica anche il limite verticale di massa.</p>
+          </aside>
+        </div>
+        <div class="notice" id="cushioning-message"></div>
+        <div class="view-footer"><button class="button button-quiet" type="button" data-go="buckling">Carico di punta</button><button class="button button-primary" type="button" data-go="inputs">Nuovo calcolo</button></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>Calcolo locale · nessun dato lascia il dispositivo</span>
+      <button type="button" id="about-button">Criteri e copertura</button>
+    </footer>
+  </div>
+
+  <dialog class="lesson-dialog lesson-performance" id="lesson-performance">
+    <form method="dialog" class="dialog-content">
+      <div class="dialog-heading">
+        <div><p class="section-kicker">Scheda didattica 01</p><h2>Forze e portate</h2></div>
+        <button class="close-button" value="close" aria-label="Chiudi">×</button>
+      </div>
+      <div class="lesson-body">
+        <section class="lesson-visual force-visual">
+          <div class="lesson-cylinder" aria-hidden="true">
+            <div class="chamber chamber-push"><span>P</span></div>
+            <div class="lesson-piston"></div>
+            <div class="chamber chamber-pull"><span>P</span></div>
+            <div class="lesson-rod"></div>
+          </div>
+          <div class="direction-row"><span>Spinta: area piena</span><strong>→</strong><span>Trazione: area anulare</span></div>
+        </section>
+        <div class="lesson-columns">
+          <section class="lesson-block lesson-blue-block">
+            <span class="lesson-number">1</span><h3>La pressione genera forza</h3>
+            <p>La forza è la pressione moltiplicata per l’area su cui agisce.</p>
+            <code>F = P · A</code>
+          </section>
+          <section class="lesson-block lesson-cyan-block">
+            <span class="lesson-number">2</span><h3>Lo stelo riduce la trazione</h3>
+            <p>In rientro si sottrae l’area dello stelo: perciò la trazione è inferiore alla spinta.</p>
+            <code>A<sub>r</sub> = π(D² − d²) / 4</code>
+          </section>
+          <section class="lesson-block lesson-green-block">
+            <span class="lesson-number">3</span><h3>Geometria e frequenza determinano la portata</h3>
+            <p>Volume per corsa e frequenza stabiliscono la portata richiesta.</p>
+            <code>Q = A · c · n</code>
+          </section>
+        </div>
+        <div class="lesson-takeaway"><strong>Da ricordare</strong><span>Più pressione aumenta la forza; più alesaggio, corsa o frequenza aumentano il consumo. I coefficienti 80% e 60% rappresentano perdite operative.</span></div>
+      </div>
+      <div class="dialog-footer"><button class="button button-primary" value="close">Ho capito</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="lesson-dialog lesson-buckling" id="lesson-buckling">
+    <form method="dialog" class="dialog-content">
+      <div class="dialog-heading">
+        <div><p class="section-kicker">Scheda didattica 02</p><h2>Carico di punta</h2></div>
+        <button class="close-button" value="close" aria-label="Chiudi">×</button>
+      </div>
+      <div class="lesson-body">
+        <section class="lesson-visual buckling-visual">
+          <div class="lesson-buckling-schematic" aria-hidden="true">
+            <div class="lesson-buckling-cylinder"><span></span></div>
+            <div class="lesson-buckling-rod"></div>
+            <div class="lesson-buckling-end"></div>
+            <div class="lesson-buckling-force">F <span>←</span></div>
+          </div>
+          <p>Uno stelo lungo e sottile può flettersi prima di raggiungere il limite del materiale.</p>
+        </section>
+        <div class="lesson-columns">
+          <section class="lesson-block lesson-orange-block"><span class="lesson-number">1</span><h3>Valuta la snellezza</h3><p>Il rapporto corsa/diametro segnala quando la stabilità diventa importante.</p><code>λ = c / d</code></section>
+          <section class="lesson-block lesson-yellow-block"><span class="lesson-number">2</span><h3>Considera i vincoli</h3><p>Il coefficiente k trasforma la corsa nella lunghezza libera equivalente.</p><code>S<sub>L</sub> = k · c</code></section>
+          <section class="lesson-block lesson-red-block"><span class="lesson-number">3</span><h3>Applica la sicurezza</h3><p>La forza critica di Eulero viene ridotta con il coefficiente di sicurezza.</p><code>F<sub>amm</sub> = F<sub>cr</sub> / k<sub>s</sub></code></section>
+        </div>
+        <div class="lesson-decision"><span class="decision-load">Carico applicato</span><strong>≤</strong><span class="decision-limit">Forza ammissibile</span><b>VERIFICA OK</b></div>
+      </div>
+      <div class="dialog-footer"><button class="button button-primary button-orange" value="close">Ho capito</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="lesson-dialog lesson-cushioning" id="lesson-cushioning">
+    <form method="dialog" class="dialog-content">
+      <div class="dialog-heading">
+        <div><p class="section-kicker">Scheda didattica 03</p><h2>Ammortizzo</h2></div>
+        <button class="close-button" value="close" aria-label="Chiudi">×</button>
+      </div>
+      <div class="lesson-body">
+        <section class="lesson-visual cushion-visual">
+          <div class="moving-mass">m</div><div class="motion-lines"></div><div class="cushion-symbol"><span></span></div>
+          <p>L’ammortizzo interno deve dissipare l’energia della massa prima del fine corsa.</p>
+        </section>
+        <div class="lesson-columns">
+          <section class="lesson-block lesson-purple-block"><span class="lesson-number">1</span><h3>Calcola l’energia</h3><p>La velocità pesa al quadrato: raddoppiandola, l’energia quadruplica.</p><code>E<sub>c</sub> = ½ · m · v²</code></section>
+          <section class="lesson-block lesson-pink-block"><span class="lesson-number">2</span><h3>Trova la curva</h3><p>Ogni alesaggio ha una propria energia limite e una massa massima.</p><code>v<sub>lim</sub> = √(2E / m)</code></section>
+          <section class="lesson-block lesson-green-block"><span class="lesson-number">3</span><h3>Leggi il diagramma</h3><p>Il punto di lavoro deve stare sotto la curva e a sinistra del limite verticale.</p><div class="mini-chart"><i></i><b></b></div></section>
+        </div>
+        <div class="lesson-takeaway lesson-purple-takeaway"><strong>Dato decisivo</strong><span>Usare la velocità reale d’impatto quando è disponibile: la velocità media da corsa e frequenza è solo una stima.</span></div>
+      </div>
+      <div class="dialog-footer"><button class="button button-primary button-purple" value="close">Ho capito</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="about-dialog">
+    <form method="dialog" class="dialog-content">
+      <div class="dialog-heading"><div><p class="section-kicker">Informazioni tecniche</p><h2>Criteri e copertura</h2></div><button class="close-button" value="close" aria-label="Chiudi">×</button></div>
+      <div class="dialog-body">
+        <h3>Funzioni riprodotte</h3>
+        <p>Forze teoriche ed effettive, portate volumetriche e normalizzate, consumo annuo, carico critico di Eulero, carico ammissibile e verifica numerica dell’ammortizzo.</p>
+        <h3>Correzioni rispetto al foglio</h3>
+        <p>La pressione inserita alimenta le formule di forza. Nel workbook originale le due forze teoriche contengono il valore fisso 6 bar. La verifica di punta ora confronta esplicitamente carico e forza ammissibile.</p>
+        <h3>Digitalizzazione del diagramma</h3>
+        <p>Le diagonali sono state lette come rette nel piano logaritmico: <code>log₁₀(v) = log₁₀(√(2E)) − 0,5·log₁₀(m)</code>. I valori E e i limiti verticali di massa derivano dal diagramma raster allegato e sono quindi approssimati.</p>
+        <h3>Limiti</h3>
+        <p>La velocità ricavata da corsa e frequenza è una velocità media senza soste; usare il valore manuale se è nota la velocità reale d’impatto. La verifica di Eulero non sostituisce le indicazioni del costruttore su montaggi, disallineamenti, attriti o carichi dinamici.</p>
+      </div>
+      <div class="dialog-footer"><button class="button button-primary" value="close">Chiudi</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="ai-dialog" id="ai-dialog" aria-labelledby="ai-dialog-title">
+    <div class="ai-topbar">
+      <div class="ai-topbrand"><span class="ai-spark">&#10022;</span><div><span class="ai-eyebrow">INTEGRAZIONE API · CHIAVI PERSONALI</span><h2 id="ai-dialog-title">Assistente AI per i dati di progetto</h2><p>Descrivi il cilindro in linguaggio naturale. Gemini estrae i parametri e ti chiede quelli mancanti; i calcoli originali restano nel browser.</p></div></div>
+      <button type="button" class="ai-close" id="ai-close-button" aria-label="Chiudi assistente">&times;</button>
+    </div>
+    <div class="ai-grid">
+      <section class="ai-chat-side" aria-label="Conversazione con Gemini">
+        <div class="ai-section-title"><span aria-hidden="true">&#128172;</span> Dialogo con l'assistente <span id="ai-connection" class="ai-connection">Verifica connessione...</span></div>
+        <div class="ai-messages" id="ai-messages" role="log" aria-live="polite"></div>
+        <div class="ai-personal-key-box">
+          <label class="ai-key-title" for="ai-api-key">Chiave Gemini personale dello studente</label>
+          <div class="ai-key-row">
+            <input id="ai-api-key" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="256" placeholder="Incolla qui la tua chiave API personale" aria-describedby="ai-key-help">
+            <button class="button button-quiet" type="button" id="ai-show-key" aria-label="Mostra o nascondi la chiave">Mostra</button>
+            <button class="button button-quiet" type="button" id="ai-clear-key">Cancella</button>
+          </div>
+          <p class="ai-key-help" id="ai-key-help">La chiave resta soltanto nel campo di questa pagina, senza salvataggi persistenti nel browser o sul server. Tramite HTTPS viene inviata al server solo per inoltrare le richieste a Gemini. Non inserirla in un computer condiviso senza chiudere la pagina dopo l'uso.</p>
+        </div>
+        <label class="ai-access-label" id="ai-access-wrap" hidden>Codice di accesso al laboratorio (eventualmente fornito dal docente)<input id="ai-access-code" type="password" autocomplete="off" placeholder="Codice del laboratorio"></label>
+        <div class="ai-composer"><label for="ai-input" class="ai-input-label">Descrizione del progetto o risposta alle domande</label><textarea id="ai-input" rows="3" maxlength="3000" placeholder="Es. cilindro doppio effetto, alesaggio 80 mm, stelo 25 mm, corsa 600 mm..."></textarea><button class="ai-send" id="ai-send-button" type="button">Invia a Gemini <span aria-hidden="true">&#8594;</span></button></div>
+        <p class="ai-disclaimer">Usa la tua chiave API personale. Non inserire dati riservati. Controlla i valori prima di utilizzarli nei calcoli.</p>
+      </section>
+      <section class="ai-data-side" aria-label="Dati di progetto raccolti">
+        <div class="ai-section-title"><span aria-hidden="true">&#128203;</span> Dati estratti e da completare</div>
+        <div class="ai-progress-meta"><strong id="ai-progress-text">0 / 14 dati richiesti</strong><span id="ai-progress-percent">0%</span></div>
+        <div class="ai-progress-track"><div id="ai-progress-fill"></div></div>
+        <div class="ai-sections" id="ai-sections"></div>
+        <div class="ai-status-note" id="ai-status-note">Il trasferimento resta disabilitato fino al completamento di tutti i campi.</div>
+        <div class="ai-footer-actions"><button type="button" class="button button-quiet" id="ai-reset-button">Nuova descrizione</button><button type="button" class="button button-ai-apply" id="ai-apply-button" disabled>Compila e calcola <span aria-hidden="true">&#8594;</span></button></div>
+      </section>
+    </div>
+  </dialog>
+
+  <script src="js/model.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/ai_schema.js"></script>
+  <script src="js/ai_assistant.js"></script>
+</body>
+</html>

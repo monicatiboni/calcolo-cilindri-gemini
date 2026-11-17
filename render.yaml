@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: calcolo-cilindri-gemini
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm install --ignore-scripts --no-audit --no-fund
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_MODEL
+        value: gemini-3-flash-preview
+      - key: GEMINI_TIMEOUT_MS
+        value: "30000"
+      - key: AI_SESSION_HOURLY_LIMIT
+        value: "25"
+      - key: AI_GLOBAL_DAILY_LIMIT
+        value: "600"
+      - key: SESSION_SECRET
+        generateValue: true
+      # OPTIONAL: restrict entry to a class with a code configured by the teacher.
+      # - key: CYLINDER_APP_ACCESS_CODE
+      #   sync: false

@@ -1,0 +1,11 @@
+{
+  "name": "calcolo-cilindri-gemini-per-studente",
+  "version": "6.0.0",
+  "private": true,
+  "description": "Calcolo cilindri ISO 15552 e Gemini AI con chiavi API personali; distribuibile su Render",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node tests/model.test.js && node --test tests/ai_schema.test.cjs tests/server.test.mjs tests/student_keys.test.mjs"
+  },
+  "engines": {"node": ">=20"}
+}
