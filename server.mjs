@@ -185,9 +185,13 @@ export function createAppServer({extractor=callGemini}={}) {
       let p;
       try{p=await readJson(req);}catch(error){return jsonReply(res,error.status || 400,{error:'INVALID_INPUT'});}
       if(!p || typeof p.message !== 'string' || !p.message.trim() || p.message.length>3000 || typeof p.known !== 'object' || !p.known || Array.isArray(p.known))return jsonReply(res,400,{error:'INVALID_INPUT'});
-      if(typeof p.apiKey !== 'string' || !/^[A-Za-z0-9_\-]{15,256}$/.test(p.apiKey.trim()))return jsonReply(res,400,{error:'PERSONAL_KEY_MISSING'});
-      // The key is used only in the scope of this request: never logged, cached or returned.
-      const personalKey=p.apiKey.trim();
+      // Do not confuse an absent key with a key of unexpected format.
+      // The provider, rather than a local character whitelist, checks authenticity.
+      // The key is never logged, returned, cached, or persisted by this service.
+      const personalKey=typeof p.apiKey === 'string' ? p.apiKey.trim() : '';
+      if(!personalKey)return jsonReply(res,400,{error:'PERSONAL_KEY_MISSING'});
+      if(personalKey.length < 15 || personalKey.length > 256 || !/^[\x21-\x7E]+$/.test(personalKey))
+        return jsonReply(res,400,{error:'PERSONAL_KEY_FORMAT'});
       const known=Object.fromEntries(Object.entries(p.known).filter(([k,v])=>VALID_KEYS.has(k) && (typeof v==='string'||typeof v==='number')));
       const quota=getLimit(signedCookie(req,res));
       if(quota)return jsonReply(res,429,{error:quota});

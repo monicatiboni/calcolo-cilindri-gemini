@@ -369,6 +369,7 @@
             <button class="button button-quiet" type="button" id="ai-show-key" aria-label="Mostra o nascondi la chiave">Mostra</button>
             <button class="button button-quiet" type="button" id="ai-clear-key">Cancella</button>
           </div>
+          <p id="ai-key-status" class="ai-key-status" aria-live="polite">Nessuna chiave API inserita.</p>
           <p class="ai-key-help" id="ai-key-help">La chiave resta soltanto nel campo di questa pagina, senza salvataggi persistenti nel browser o sul server. Tramite HTTPS viene inviata al server solo per inoltrare le richieste a Gemini. Non inserirla in un computer condiviso senza chiudere la pagina dopo l'uso.</p>
         </div>
         <label class="ai-access-label" id="ai-access-wrap" hidden>Codice di accesso al laboratorio (eventualmente fornito dal docente)<input id="ai-access-code" type="password" autocomplete="off" placeholder="Codice del laboratorio"></label>
@@ -389,6 +390,6 @@
   <script src="js/model.js"></script>
   <script src="js/app.js"></script>
   <script src="js/ai_schema.js"></script>
-  <script src="js/ai_assistant.js"></script>
+  <script src="js/ai_assistant.js?v=6.1"></script>
 </body>
 </html>

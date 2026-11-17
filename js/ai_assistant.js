@@ -13,7 +13,17 @@
   const input = $('#ai-input');
   const keyInput = $('#ai-api-key');
   function isReady() {return configured && keyInput.value.trim().length >= 15;}
-  function updateSendState() { $('#ai-send-button').disabled = !isReady() || busy; }
+  function updateSendState() {
+    const length=keyInput.value.trim().length;
+    const status=$('#ai-key-status');
+    status.textContent=length >= 15
+      ? 'Chiave inserita nel campo (non ancora verificata da Google).'
+      : length > 0
+        ? 'Chiave rilevata ma troppo breve: incolla la chiave API completa.'
+        : 'Nessuna chiave API inserita.';
+    status.className='ai-key-status ' + (length>=15?'ai-key-present':length>0?'ai-key-short':'');
+    $('#ai-send-button').disabled = !isReady() || busy;
+  }
 
   function addBubble(text, role) {
     const row = document.createElement('div');
@@ -105,7 +115,8 @@
 
   function errorText(code) {
     const catalog = {
-      PERSONAL_KEY_MISSING: 'Inserisci la tua chiave API personale di Google AI Studio per iniziare.',
+      PERSONAL_KEY_MISSING: 'Il server non ha ricevuto alcuna chiave API. Controlla il campo Chiave Gemini.',
+      PERSONAL_KEY_FORMAT: 'La chiave e presente, ma il formato non sembra corretto. Incolla soltanto la chiave copiata da Google AI Studio, senza virgolette, spazi o righe aggiuntive.',
       ACCESS_DENIED: 'Codice di accesso al laboratorio non corretto.',
       RATE_LIMIT_PROVIDER: 'Google ha raggiunto il limite delle richieste. Riprovare piu tardi.',
       MODEL_NOT_FOUND: 'Il modello Gemini configurato non e disponibile per questa chiave. Contatta il docente per scegliere un modello compatibile.',
@@ -202,7 +213,18 @@
     input.value = '';
   }
 
-  keyInput.addEventListener('input', updateSendState);
+  keyInput.addEventListener('input', () => {
+    // Previous prompts about a missing key may remain visible after the user
+    // inserts a key; remove just these obsolete notices, not the chat history.
+    if(keyInput.value.trim().length >= 15) {
+      messages.querySelectorAll('.ai-message-assistant').forEach(row => {
+        const bubble=row.firstElementChild;
+        if(bubble && (bubble.textContent === 'Inserisci la tua chiave API personale di Google AI Studio per iniziare.' ||
+                      bubble.textContent === errorText('PERSONAL_KEY_MISSING'))) row.remove();
+      });
+    }
+    updateSendState();
+  });
   $('#ai-show-key').addEventListener('click', () => {
     const visible=keyInput.type === 'text'; keyInput.type=visible?'password':'text'; $('#ai-show-key').textContent=visible?'Mostra':'Nascondi';
   });
@@ -223,4 +245,5 @@
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); sendMessage(); }
   });
   renderFields();
+  updateSendState();
 })();

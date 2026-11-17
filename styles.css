@@ -333,3 +333,8 @@ main { min-height: 0; overflow: hidden; }
 .ai-key-help{color:#5d6382;line-height:1.5;font-size:10.5px;margin:8px 1px 0}
 .ai-section-title{flex-wrap:wrap}
 @media (max-width:540px){.ai-key-row{flex-wrap:wrap}.ai-key-row input{flex-basis:100%}.ai-key-row button{flex:1}}
+
+/* API key presence indicator; never displays a key or its characters. */
+.ai-key-status {margin: 8px 0 0; font-size: 12px; font-weight: 750; color: #6d477e;}
+.ai-key-status.ai-key-present {color: #17633e;}
+.ai-key-status.ai-key-short {color: #996018;}
